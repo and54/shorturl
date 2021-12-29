@@ -11,15 +11,15 @@ router.get('/:shortUrl', async (req, res, next) => {
     if (err) res.status(400).send('Error fetching shortUrl!');
     else {
       console.log('fetched data', result);
-      if (!result?.url) res.status(400).send('shortUrl doesn\'t exists!');
-      else res.json({ ...result });
+      if (!result?.url) res.json({ success: false, error: 'shortUrl doesn\'t exist!' });
+      else res.json({ ...result, success: true });
     }
   });
 });
 
 router.post('/', async(req, res, next) => {
-  const { url } = req.body;
-  if (!url) res.status(400).send('URL not received');
+  const { url } = req.body || {};
+  if (!url) return res.status(400).send('URL not received');
   const shortUrl = createShort();
   const insertDoc = { url, shortUrl };
   const dbConnect = dbo.getDb();
@@ -27,7 +27,7 @@ router.post('/', async(req, res, next) => {
     if (err) res.status(400).send("Error inserting url!");
     else {
       console.log(`Added a new match with id ${result.insertedId}`);
-      res.json({ id: result.insertedId, ...insertDoc })
+      res.json({ success: true, id: result.insertedId, ...insertDoc })
     }
   });
 });
